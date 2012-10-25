@@ -389,6 +389,46 @@ ngx_http_upstream_consistent_hash_find(ngx_http_upstream_chash_ring_t *ring, ngx
     }
 }
 
+void
+ngx_quicksort(void *base, size_t n, size_t size,
+    ngx_int_t (*cmp)(const void *, const void *))
+{
+    size_t m=0;
+    u_char  *lp, *rp, *swap, *p;
+    if(base == NULL) return;
+    if(n <= 1) return;
+    lp   = (u_char *)base;
+    rp   = lp + size*(n-1);
+
+    swap = ngx_alloc(size, ngx_cycle->log);
+    if(swap == NULL)return;
+    p = ngx_alloc(size, ngx_cycle->log);
+    if(p == NULL)return;
+    ngx_memcpy(p, lp, size);
+
+    while(lp <= rp){
+        while(cmp(rp, p)>0){
+            rp = rp -size;
+        } 
+        while(cmp(p, lp)>0){
+            lp = lp +size;m=m+1;
+        }
+        if(lp <= rp){
+            ngx_memcpy(swap, lp, size);
+            ngx_memcpy(lp, rp, size);
+            ngx_memcpy(rp, swap, size);
+            rp = rp -size;
+            lp = lp +size;m=m+1;
+        }
+    }
+    if(m == 0){lp = lp +size;m=m+1;}
+    ngx_free(p);
+    ngx_free(swap);
+    ngx_quicksort(base, m, size, cmp);
+    ngx_quicksort(lp, n-m, size, cmp);
+}
+
+
 
 ngx_int_t
 ngx_http_upstream_init_consistent_hash(ngx_conf_t *cf, ngx_http_upstream_srv_conf_t *us)
@@ -490,7 +530,7 @@ ngx_http_upstream_init_consistent_hash(ngx_conf_t *cf, ngx_http_upstream_srv_con
         }
     }
 
-    ngx_sort(ring->v_nodes, ring->v_number, sizeof(ngx_http_upstream_chash_virtual_node_t),
+    ngx_quicksort(ring->v_nodes, ring->v_number, sizeof(ngx_http_upstream_chash_virtual_node_t),
                             (const void *) ngx_http_upstream_consistent_hash_compare_virtual_nodes);
 
     for (i=0; i<ring->v_number; i++) {
