@@ -490,7 +490,7 @@ ngx_http_upstream_init_consistent_hash(ngx_conf_t *cf, ngx_http_upstream_srv_con
         }
     }
 
-    ngx_sort(ring->v_nodes, ring->v_number, sizeof(ngx_http_upstream_chash_virtual_node_t),
+    ngx_qsort(ring->v_nodes, ring->v_number, sizeof(ngx_http_upstream_chash_virtual_node_t),
                             (const void *) ngx_http_upstream_consistent_hash_compare_virtual_nodes);
 
     for (i=0; i<ring->v_number; i++) {
