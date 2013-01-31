@@ -1,4 +1,3 @@
-
 #include <ngx_config.h>
 #include <ngx_core.h>
 #include <ngx_http.h>
@@ -6,7 +5,7 @@
 
 #define NR_BUCKETS          1039
 #define NR_SCALE            1024
-#define MAX_PEER_FAILED     3
+#define MAX_PEER_FAILED     2
 
 
 typedef struct {
